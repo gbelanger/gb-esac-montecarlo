@@ -1,6 +1,5 @@
 package gb.esac.montecarlo;
 
-
 import java.text.DecimalFormat;
 import java.util.Arrays;
 
@@ -15,7 +14,6 @@ import cern.jet.random.Uniform;
 import org.apache.log4j.Logger;
 
 
-
 /**
  * The class <code>WhiteNoiseGenerator</code> is used to simulate white noise.  The term "white noise" refers to a signal that has equal power at all frequencies, and thus the power spectrum of white noise is flat. White noise is uncorrelated or memory-less noise, which means that each event occurs independently, with no memory of the occurence time of the previous event: this is a Poisson process. As such, the distribution of inter-arrival times follows the single parameter exponential distribution with mean given by the inverse of the mean count rate (the decay constant is equal to the mean count rate). The methods of this class generate white noise in the form of arrival times, either with a constant mean or a sinusoidally modulated mean.
  *
@@ -24,14 +22,11 @@ import org.apache.log4j.Logger;
  */
 public final class WhiteNoiseGenerator {
 
-
     static Logger logger = Logger.getLogger(WhiteNoiseGenerator.class);
-
 
     private static DecimalFormat number = new DecimalFormat("0.00000000");
     private static DecimalFormat freq = new DecimalFormat("0.000E0");
 
-	
 
    /**
      * Generate white noise arrival times with constant mean.
@@ -41,11 +36,9 @@ public final class WhiteNoiseGenerator {
      * @return a <code>double[]</code> value
      */
     public static double[] generateArrivalTimes (double meanRate, double duration) {
-		
 	MersenneTwister64 engine = new MersenneTwister64(new java.util.Date());
 	return generateArrivalTimes(meanRate, duration, engine);
     }
-	
 
 
     /**
@@ -57,12 +50,9 @@ public final class WhiteNoiseGenerator {
      * @return a <code>double[]</code> value
      */
     public static double[] generateArrivalTimes (double meanRate, double duration, RandomEngine engine) {
-
 	logger.info("Generating white noise arrival times with constant mean rate");
 	logger.info("Duration = "+duration);
 	logger.info("Mean rate (specified) = "+meanRate);
-
-	
 	//  Generate arrival times
 	Exponential randomExp = new Exponential(meanRate, engine);
 	DoubleArrayList times = new DoubleArrayList();
@@ -71,29 +61,21 @@ public final class WhiteNoiseGenerator {
 	double time = dt;
 	times.add(time);
 	while ( time < duration ) {
-
 	    dt = randomExp.nextDouble();
-
 	    time += dt;
 	    times.add(time);
 	}
 	times.trimToSize();
 	double[] arrivalTimes = times.elements();
-
-
 	//  Adjust actual duration to specified duration
 	arrivalTimes[arrivalTimes.length-1] = tzero + duration;
 	int nevents = arrivalTimes.length;
 	double mean = nevents/duration;
-
 	logger.info("Arrival times generated");
 	logger.info("nEvents = "+nevents);
 	logger.info("Mean rate (actual) = "+mean);
-
 	return arrivalTimes;
     }
-
-
 
 	
     /**
@@ -107,7 +89,6 @@ public final class WhiteNoiseGenerator {
      * @return a <code>double[]</code> value
      */
     public static double[] generateModulatedArrivalTimes(double meanRate, double duration, double period, double pulsedFrac) {
-		
 	MersenneTwister64 engine = new MersenneTwister64(new java.util.Date());
 	return generateModulatedArrivalTimes(meanRate, duration, period, pulsedFrac, engine);
     }
@@ -124,7 +105,6 @@ public final class WhiteNoiseGenerator {
      * @return a <code>double[]</code> value
      */
     public static double[] generateModulatedArrivalTimes(double meanRate, double duration, double period, double pulsedFrac, RandomEngine engine) {
-
 	logger.info("Generating sinusoidally modulated white noise arrival times");
 	logger.info("Mean rate (specified) = "+meanRate);
 	logger.info("Duration = "+duration);
