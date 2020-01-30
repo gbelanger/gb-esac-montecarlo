@@ -36,8 +36,8 @@ public final class WhiteNoiseGenerator {
      * @return a <code>double[]</code> value
      */
     public static double[] generateArrivalTimes (double meanRate, double duration) {
-	MersenneTwister64 engine = new MersenneTwister64(new java.util.Date());
-	return generateArrivalTimes(meanRate, duration, engine);
+		MersenneTwister64 engine = new MersenneTwister64(new java.util.Date());
+		return generateArrivalTimes(meanRate, duration, engine);
     }
 
 
@@ -50,31 +50,31 @@ public final class WhiteNoiseGenerator {
      * @return a <code>double[]</code> value
      */
     public static double[] generateArrivalTimes (double meanRate, double duration, RandomEngine engine) {
-	logger.info("Generating white noise arrival times with constant mean rate");
-	logger.info("Duration = "+duration);
-	logger.info("Mean rate (specified) = "+meanRate);
-	//  Generate arrival times
-	Exponential randomExp = new Exponential(meanRate, engine);
-	DoubleArrayList times = new DoubleArrayList();
-	double dt = randomExp.nextDouble();
-	double tzero = dt;
-	double time = dt;
-	times.add(time);
-	while ( time < duration ) {
-	    dt = randomExp.nextDouble();
-	    time += dt;
-	    times.add(time);
-	}
-	times.trimToSize();
-	double[] arrivalTimes = times.elements();
-	//  Adjust actual duration to specified duration
-	arrivalTimes[arrivalTimes.length-1] = tzero + duration;
-	int nevents = arrivalTimes.length;
-	double mean = nevents/duration;
-	logger.info("Arrival times generated");
-	logger.info("nEvents = "+nevents);
-	logger.info("Mean rate (actual) = "+mean);
-	return arrivalTimes;
+		logger.info("Generating white noise arrival times with constant mean rate");
+		logger.info("Duration = "+duration);
+		logger.info("Mean rate (specified) = "+meanRate);
+		//  Generate arrival times
+		Exponential randomExp = new Exponential(meanRate, engine);
+		DoubleArrayList times = new DoubleArrayList();
+		double dt = randomExp.nextDouble();
+		double tzero = dt;
+		double time = dt;
+		times.add(time);
+		while ( time < duration ) {
+		    dt = randomExp.nextDouble();
+		    time += dt;
+		    times.add(time);
+		}
+		times.trimToSize();
+		double[] arrivalTimes = times.elements();
+		//  Adjust actual duration to specified duration
+		arrivalTimes[arrivalTimes.length-1] = tzero + duration;
+		int nevents = arrivalTimes.length;
+		double mean = nevents/duration;
+		logger.info("Arrival times generated");
+		logger.info("nEvents = "+nevents);
+		logger.info("Mean rate (actual) = "+mean);
+		return arrivalTimes;
     }
 
 	
@@ -89,8 +89,8 @@ public final class WhiteNoiseGenerator {
      * @return a <code>double[]</code> value
      */
     public static double[] generateModulatedArrivalTimes(double meanRate, double duration, double period, double pulsedFrac) {
-	MersenneTwister64 engine = new MersenneTwister64(new java.util.Date());
-	return generateModulatedArrivalTimes(meanRate, duration, period, pulsedFrac, engine);
+		MersenneTwister64 engine = new MersenneTwister64(new java.util.Date());
+		return generateModulatedArrivalTimes(meanRate, duration, period, pulsedFrac, engine);
     }
 
 	
@@ -105,118 +105,118 @@ public final class WhiteNoiseGenerator {
      * @return a <code>double[]</code> value
      */
     public static double[] generateModulatedArrivalTimes(double meanRate, double duration, double period, double pulsedFrac, RandomEngine engine) {
-	logger.info("Generating sinusoidally modulated white noise arrival times");
-	logger.info("Mean rate (specified) = "+meanRate);
-	logger.info("Duration = "+duration);
-	logger.info("Period = "+period);
-	logger.info("Pulsed Fraction = "+pulsedFrac);
-		
-	/**     Generating modulated arrival times
-		 
-	    Instantaneous modulated flux is given by:	
-	    lambda(t) = a + b*(1 + sin(wt))
-	    where  a = meanRate/( 1 + pulsedFrac/(wT)*(1 - cos(wT)) )
-	           b = a*pulsedFrac
-	    Probability density function is given by:
-	    f(t) = [a + b*(1 - sin(w(t0 + t)))] * exp{ -at - (2b/w)(sin(w(t0 + t/2))*sin(wt/2)) }
-		 
-	**/
+		logger.info("Generating sinusoidally modulated white noise arrival times");
+		logger.info("Mean rate (specified) = "+meanRate);
+		logger.info("Duration = "+duration);
+		logger.info("Period = "+period);
+		logger.info("Pulsed Fraction = "+pulsedFrac);
+			
+		/**     Generating modulated arrival times
+			 
+		    Instantaneous modulated flux is given by:	
+		    lambda(t) = a + b*(1 + sin(wt))
+		    where  a = meanRate/(1 + pulsedFrac/(wT)*(1 - cos(wT)))
+		           b = a*pulsedFrac
+		    Probability density function is given by:
+		    f(t) = [a + b*(1 - sin(w(t0 + t)))] * exp{-at - (2b/w)(sin(w(t0 + t/2))*sin(wt/2))}
+			 
+		**/
 
-	//  Set up random generator distributions
-	Uniform randUni = new Uniform(engine);
-	Exponential randExp = new Exponential(1.0, engine);
-	Poisson randPoiss = new Poisson(1.0, engine);
-	//  Define Variables
-	double pf = pulsedFrac;
-	if ( pf == 1.0 ) pf = 0.999;
-	double t_obs = duration;
-	double w = 2*Math.PI/period;
-	double phi_obs = w*t_obs;
-	double lambda_0 = meanRate/( 1 + pf/phi_obs*(1 - Math.cos(phi_obs)) );
-	double lambda_1 = pf*lambda_0;
-	double thetaMax = lambda_0*t_obs + (lambda_1/w)*(1 - Math.cos(phi_obs));
-	//  Construct set of theta[i]'s from which we will get the t[i]'s
-	int nevents = randPoiss.nextInt(thetaMax);
-	double[] theta = new double[nevents];
-	for ( int i=0; i < nevents; i++ ) {
-	    theta[i] = randUni.nextDouble()*thetaMax;
-	}
-	Arrays.sort(theta);
-	//  Construct the t[i]'s using each theta[i] by solving
-	//   theta[i] = lambda_0*t[i] - lambda_1/w * Math.cos(w*t[i])
-	double[] times = new double[nevents];
-	double t_new = 0;
-	double f = 1;
-	double fPrime = 0;
-	//  Root finding by the False Position method
-	for ( int i=0; i < nevents; i++ ) {
-	    double a = -1;
-	    double b = t_obs;
-	    double t = 0;
-	    int side = 0;
-	    double fOfa = lambda_0*a + lambda_1/w*(1-Math.cos(w*a)) - theta[i];
-	    double fOfb = lambda_0*b + lambda_1/w*(1-Math.cos(w*b)) - theta[i];
-	    double fOft = lambda_0*t + lambda_1/w*(1-Math.cos(w*t)) - theta[i];
-	    double delta = 1e-5;
-	    double absDiff = Math.abs(b-a);
-	    double limit = delta*Math.abs(b+a);
-	    int iterations = 0;
-	    while ( absDiff > limit && i < nevents ) {
-		iterations++;
-		t = (fOfa*b - fOfb*a) / (fOfa - fOfb);
-		absDiff = Math.abs(b-a);
-		limit = delta*Math.abs(b+a);
-		fOft = lambda_0*t + lambda_1/w*(1-Math.cos(w*t)) - theta[i];
-		if ( fOft*fOfb > 0 ) {
-		    b = t;
-		    fOfb = fOft;
-		    if ( side == -1 ) {
-			fOfa /= 2;
-		    }
-		    side = -1;
+		//  Set up random generator distributions
+		Uniform randUni = new Uniform(engine);
+		Exponential randExp = new Exponential(1.0, engine);
+		Poisson randPoiss = new Poisson(1.0, engine);
+		//  Define Variables
+		double pf = pulsedFrac;
+		if ( pf == 1.0 ) pf = 0.999;
+		double t_obs = duration;
+		double w = 2*Math.PI/period;
+		double phi_obs = w*t_obs;
+		double lambda_0 = meanRate/( 1 + pf/phi_obs*(1 - Math.cos(phi_obs)) );
+		double lambda_1 = pf*lambda_0;
+		double thetaMax = lambda_0*t_obs + (lambda_1/w)*(1 - Math.cos(phi_obs));
+		//  Construct set of theta[i]'s from which we will get the t[i]'s
+		int nevents = randPoiss.nextInt(thetaMax);
+		double[] theta = new double[nevents];
+		for ( int i=0; i < nevents; i++ ) {
+		    theta[i] = randUni.nextDouble()*thetaMax;
 		}
-		else if ( fOfa * fOft > 0 ) {
-		    a = t;
-		    fOfa = fOft;
-		    if ( side == 1 ) {
-			fOfb /= 2;
+		Arrays.sort(theta);
+		//  Construct the t[i]'s using each theta[i] by solving
+		//   theta[i] = lambda_0*t[i] - lambda_1/w * Math.cos(w*t[i])
+		double[] times = new double[nevents];
+		double t_new = 0;
+		double f = 1;
+		double fPrime = 0;
+		//  Root finding by the False Position method
+		for ( int i=0; i < nevents; i++ ) {
+		    double a = -1;
+		    double b = t_obs;
+		    double t = 0;
+		    int side = 0;
+		    double fOfa = lambda_0*a + lambda_1/w*(1-Math.cos(w*a)) - theta[i];
+		    double fOfb = lambda_0*b + lambda_1/w*(1-Math.cos(w*b)) - theta[i];
+		    double fOft = lambda_0*t + lambda_1/w*(1-Math.cos(w*t)) - theta[i];
+		    double delta = 1e-5;
+		    double absDiff = Math.abs(b-a);
+		    double limit = delta*Math.abs(b+a);
+		    int iterations = 0;
+		    while ( absDiff > limit && i < nevents ) {
+			iterations++;
+			t = (fOfa*b - fOfb*a) / (fOfa - fOfb);
+			absDiff = Math.abs(b-a);
+			limit = delta*Math.abs(b+a);
+			fOft = lambda_0*t + lambda_1/w*(1-Math.cos(w*t)) - theta[i];
+			if ( fOft*fOfb > 0 ) {
+			    b = t;
+			    fOfb = fOft;
+			    if ( side == -1 ) {
+				fOfa /= 2;
+			    }
+			    side = -1;
+			}
+			else if ( fOfa * fOft > 0 ) {
+			    a = t;
+			    fOfa = fOft;
+			    if ( side == 1 ) {
+				fOfb /= 2;
+			    }
+			    side = 1;
+			}
+			else break;
 		    }
-		    side = 1;
+		    //System.out.println("t = "+number.format(t)+" (iterations = "+iterations+")");
+		    times[i] = t;
 		}
-		else break;
-	    }
-	    //System.out.println("t = "+number.format(t)+" (iterations = "+iterations+")");
-	    times[i] = t;
-	}
-	//  Adjust actual duration to specified duration
-	try {
-	    times[nevents-1] = times[0] + duration;
-	}
-	catch (ArrayIndexOutOfBoundsException e) {
-	    logger.warn("There are no elements in this array");
-	}
-	// 	/**  Root finding by Newton's method **/
-	// 	for ( int i=0; i < nevents; i++ ) {
-	// 	    double delta = 1;
-	// 	    double t = theta[i]/lambda_0;
-	// 	    //System.out.println("i = "+i+"(of "+nevents+"), \t First t = "+t);
-	// 	    while ( delta > 1e-3 && i < nevents && f != 0 ) {
-	// 		f = lambda_0*t + lambda_1/w*(1 - Math.cos(w*t)) - theta[i];
-	// 		fPrime = lambda_0 + lambda_1*Math.sin(w*t);
-	// 		t_new = t - f/fPrime;
-	// 		//System.out.print("i = "+i+"(of "+nevents+"), \t (t-t_new) = "+number.format(t-t_new)+"\t");
-	// 		delta = Math.abs((t - t_new)/t_new);
-	// 		//System.out.println("delta = "+number.format(delta));
-	// 		t = t_new;
-	// 	    }
-	// 	    //System.out.println("delta (upon exit) = "+delta);	    
-	// 	    times[i] = t;
-	// 	}
-	double mean = nevents/duration;
-	logger.info("Arrival times generated");
-	logger.info("nEvents = "+nevents);
-	logger.info("Mean rate (actual) = "+mean);
-	return times;
+		//  Adjust actual duration to specified duration
+		try {
+		    times[nevents-1] = times[0] + duration;
+		}
+		catch (ArrayIndexOutOfBoundsException e) {
+		    logger.warn("There are no elements in this array");
+		}
+		// 	/**  Root finding by Newton's method **/
+		// 	for ( int i=0; i < nevents; i++ ) {
+		// 	    double delta = 1;
+		// 	    double t = theta[i]/lambda_0;
+		// 	    //System.out.println("i = "+i+"(of "+nevents+"), \t First t = "+t);
+		// 	    while ( delta > 1e-3 && i < nevents && f != 0 ) {
+		// 		f = lambda_0*t + lambda_1/w*(1 - Math.cos(w*t)) - theta[i];
+		// 		fPrime = lambda_0 + lambda_1*Math.sin(w*t);
+		// 		t_new = t - f/fPrime;
+		// 		//System.out.print("i = "+i+"(of "+nevents+"), \t (t-t_new) = "+number.format(t-t_new)+"\t");
+		// 		delta = Math.abs((t - t_new)/t_new);
+		// 		//System.out.println("delta = "+number.format(delta));
+		// 		t = t_new;
+		// 	    }
+		// 	    //System.out.println("delta (upon exit) = "+delta);	    
+		// 	    times[i] = t;
+		// 	}
+		double mean = nevents/duration;
+		logger.info("Arrival times generated");
+		logger.info("nEvents = "+nevents);
+		logger.info("Mean rate (actual) = "+mean);
+		return times;
     }
 
 
