@@ -50,7 +50,7 @@ public class TimeMappingEffect {
 	//  Define the number of events to draw
 	MersenneTwister64 engine = new MersenneTwister64(new java.util.Date());
 	Poisson poisson = new Poisson(1, engine);
-	int nevents = (new Double(mean*duration)).intValue();
+	int nevents = (int) Math.rint(mean*duration);
 	nevents = poisson.nextInt(nevents);
 	
 	//  Define resampling factors
@@ -85,7 +85,7 @@ public class TimeMappingEffect {
 		//  Generate rates from freqs based on T=longDuration with matching time resolution
 		int factor = resamplingFactors[j];
 		double longDuration = factor*duration;
-		double[] rates = TimmerKonig.getTimmerRates(alpha, longDuration, nTimeBins*factor);
+		double[] rates = TimmerKonig.getRates(alpha, longDuration, nTimeBins*factor);
 
 		//  Resample the rates so that there are the same number of bins as if T=duration
  		double[] oldBinEdges = BinningUtils.getBinEdges(0, longDuration, factor*nTimeBins);

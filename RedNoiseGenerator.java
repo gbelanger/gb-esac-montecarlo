@@ -113,7 +113,7 @@ public final class RedNoiseGenerator {
 		
 		//  Define the pseudo-random number of events to be drawn
 		Poisson poisson = new Poisson(0, engine);
-		int nevents = (new Double(meanRate*duration)).intValue();
+		int nevents = (int) Math.round(meanRate*duration);
 		nevents = poisson.nextInt(nevents);
 
 		//  Draw arrival times
@@ -204,7 +204,7 @@ public final class RedNoiseGenerator {
 		//  Define the number of events
 		MersenneTwister64 engine = new MersenneTwister64(new java.util.Date());
 		Poisson poisson = new Poisson(0, engine);
-		int nevents = (new Double(meanRate*duration)).intValue();
+		int nevents = (int) Math.round(meanRate*duration);
 		logger.info("Nominal number of events = "+nevents+" (duration*meanRate)");
 		nevents = poisson.nextInt(nevents);
 		logger.info("Random Poisson number of events = "+nevents);
@@ -271,7 +271,7 @@ public final class RedNoiseGenerator {
 		//  Define the number of events
 		MersenneTwister64 engine = new MersenneTwister64(new java.util.Date());
 		Poisson poisson = new Poisson(0, engine);
-		int nevents = (new Double(meanRate*duration)).intValue();
+		int nevents = (int) Math.round(meanRate*duration);
 		logger.info("Nominal number of events = "+nevents+" (duration*meanRate)");
 		nevents = poisson.nextInt(nevents);
 		logger.info("Random Poisson number of events = "+nevents);
@@ -325,11 +325,11 @@ public final class RedNoiseGenerator {
 
 		// Calculate the mean rates for red and pulsed events
 		Poisson poisson = new Poisson(1, engine);
-		int nevents = (new Double(meanRate*duration)).intValue();
+		int nevents = (int) Math.round(meanRate*duration);
 		logger.info("Nominal number of events = "+nevents+" (duration*meanRate)");
 		nevents = poisson.nextInt(nevents);
 		logger.info("Random Poisson number of events = "+nevents);
-		double nEvents = (new Double(nevents)).doubleValue();
+		double nEvents = (double) nevents;
 		double nPulsedEvents = pulsedFrac*nEvents;
 		double pulsedMeanRate = nPulsedEvents/duration;
 		logger.info("Pulsed events = "+nPulsedEvents);
@@ -381,11 +381,11 @@ public final class RedNoiseGenerator {
 
 		// Calculate the mean rates for red and pulsed events
 		Poisson poisson = new Poisson(1, engine);
-		int nevents = (new Double(meanRate*duration)).intValue();
+		int nevents = (int) Math.round(meanRate*duration);
 		logger.info("Nominal number of events = "+nevents+" (duration*meanRate)");
 		nevents = poisson.nextInt(nevents);
 		logger.info("Random Poisson number of events = "+nevents);
-		double nEvents = (new Double(nevents)).doubleValue();
+		double nEvents = (double) nevents;
 		double nPulsedEvents = pulsedFrac*nEvents;
 		double pulsedMeanRate = nPulsedEvents/duration;
 		logger.info("Pulsed events = "+nPulsedEvents);
@@ -438,11 +438,11 @@ public final class RedNoiseGenerator {
 
 		// Calculate the mean rates for red and pulsed events
 		Poisson poisson = new Poisson(1, engine);
-		int nevents = (new Double(meanRate*duration)).intValue();
-		logger.info("Nominal number of events = "+nevents+" (duration*meanRate)");
-		nevents = poisson.nextInt(nevents);
-		logger.info("Random Poisson number of events = "+nevents);
-		double nEvents = (new Double(nevents)).doubleValue();
+		int n = (int) Math.round(meanRate*duration);
+		logger.info("Nominal number of events = "+n+" (duration*meanRate)");
+		n = poisson.nextInt(n);
+		logger.info("Random Poisson number of events = "+n);
+		double nEvents = (double) n;
 		double nPulsedEvents = pulsedFrac*nEvents;
 		double pulsedMeanRate = nPulsedEvents/duration;
 		logger.info("Pulsed events = "+nPulsedEvents);
@@ -502,7 +502,7 @@ public final class RedNoiseGenerator {
 		try {
 		    ts.writeCountsAsQDP("tk_rates.qdp");
 		    AsciiDataFileWriter hist = new AsciiDataFileWriter("tk_rates_histo.qdp");
-		    hist.writeHisto(Binner.makeHisto(timmerRates, (int)timmerRates.length/50), "Rate");
+		    hist.writeHisto(Binner.makeHisto(timmerRates, timmerRates.length/50), "Rate");
 		}
 		catch (IOException e) {}
     }

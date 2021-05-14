@@ -38,7 +38,7 @@ public class TestAutoRegressionGenerator {
 	System.out.println(fitRes[0]+"\t"+fitRes[2]);
 
 	double mean = 1; 
-	double[] tk = TimmerKonig.getTimmerRates(mean, duration, alpha, nTimeBins);
+	double[] tk = TimmerKonig.getRates(mean, duration, alpha, nTimeBins);
 	out = new AsciiDataFileWriter("tk.qdp");
 	out.writeData(head, times, tk);
 	FFTPeriodogram tk_fft = PeriodogramMaker.makeUnnormalizedWindowedFFTPeriodogram(tk, duration, "rectangular", 1);

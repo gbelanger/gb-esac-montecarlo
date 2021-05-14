@@ -14,7 +14,7 @@ public class TestRedNoiseGenerator {
     public static void main(String[] args) throws Exception {
 
 	double mean = 10;
-	double duration = (new Double(args[0])).doubleValue();
+	double duration = Double.valueOf(args[0]);
 	double alpha = 2;
 	double bintime = 1d;
 	
@@ -34,8 +34,8 @@ public class TestRedNoiseGenerator {
 	if (compare) {
 	    EventList evlist_cdf = new EventList("tk_times_cdf.qdp");
 	    EventList evlist_rates = new EventList("tk_times_rates.qdp");
-	    TimeSeries ts_cdf = (TimeSeries) TimeSeriesMaker.makeTimeSeries(evlist_cdf, bintime);
-	    TimeSeries ts_rates = (TimeSeries) TimeSeriesMaker.makeTimeSeries(evlist_rates, bintime);
+	    TimeSeries ts_cdf = TimeSeriesMaker.makeTimeSeries(evlist_cdf, bintime);
+	    TimeSeries ts_rates = TimeSeriesMaker.makeTimeSeries(evlist_rates, bintime);
 	    ts_cdf.writeCountsAsQDP("ts_cdf.qdp");
 	    ts_rates.writeCountsAsQDP("ts_rates.qdp");
 	}

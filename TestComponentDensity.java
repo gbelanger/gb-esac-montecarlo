@@ -2,6 +2,7 @@ package gb.esac.montecarlo;
 
 
 import gb.esac.eventlist.EventList;
+import gb.esac.eventlist.EventListSelector;
 import gb.esac.periodogram.AggregatePeriodogram;
 import gb.esac.periodogram.AveragePeriodogram;
 import gb.esac.periodogram.FFTPeriodogram;
@@ -43,7 +44,7 @@ public class TestComponentDensity {
 	for ( int i=0; i < nSpecs; i++ ) {
 	    double[] arrivalTimes = RedNoiseGenerator.generateArrivalTimes(mean, tTot, alpha, nFreqsPerIFS);
 	    EventList evlist = new EventList(arrivalTimes);
-	    evlist = new EventList(evlist.getArrivalTimesRandomSegment(tObs));
+	    evlist = new EventList(EventListSelector.getArrivalTimesRandomSegment(evlist, tObs));
 	    FFTPeriodogram psd = PeriodogramMaker.makeOversampledWindowedFFTPeriodogram(evlist, windowName, normName, sampling);
 	    avgPsd.add(psd);
 	    logger.info("Added periodogram "+(i+1)+" (of "+nSpecs+") to AggregatePeriodogram");
