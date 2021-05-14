@@ -1,2 +1,3 @@
-*.class
-*.java-old
+./*.java-old
+./*.class
+
